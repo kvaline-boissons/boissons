@@ -361,14 +361,19 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- PANNEAU SECRET "MODE CRÉATEUR" (TOTALEMENT INVISIBLE PAR DÉFAUT)      -->
+  <!-- PANNEAU SECRET "MODE CRÉATEUR" (SYNCHRONISÉ EN TEMPS RÉEL VIA CLOUD)  -->
   <!-- Activable via ?admin=kvaline2026, Ctrl+M / Cmd+M ou triple-clic logo  -->
   <!-- ===================================================================== -->
   <div id="creator-drawer" class="hidden fixed bottom-5 right-5 z-50 w-[92vw] max-w-md bg-zinc-950 text-white rounded-3xl p-5 shadow-2xl border-2 border-[#E2F124]/70">
     <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
       <div>
-        <span class="text-[10px] uppercase tracking-widest text-[#E2F124] font-bold block">Tableau de bord privé · Ctrl+M</span>
-        <h4 class="font-display font-extrabold text-lg">Mode Créateur — Stats Live</h4>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] uppercase tracking-widest text-[#E2F124] font-bold">Tableau de bord privé · Ctrl+M</span>
+          <span id="cloud-sync-badge" class="text-[9px] uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
+            ● Cloud Live
+          </span>
+        </div>
+        <h4 class="font-display font-extrabold text-lg mt-0.5">Mode Créateur — Stats Live</h4>
       </div>
       <button type="button" onclick="closeCreatorDrawer()" aria-label="Fermer le panneau créateur"
               class="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center text-xs font-bold cursor-pointer">
@@ -398,16 +403,16 @@
               class="bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold py-2.5 px-3 rounded-xl border border-zinc-700 transition cursor-pointer">
         Simuler un nouveau client
       </button>
-      <button type="button" onclick="resetDemoStats()"
-              class="bg-zinc-900 hover:bg-red-950/60 text-zinc-300 hover:text-red-300 text-xs font-bold py-2.5 px-3 rounded-xl border border-zinc-700 transition cursor-pointer">
-        Réinitialiser à 710 / 241
+      <button type="button" onclick="syncCloudStats(true)"
+              class="bg-zinc-900 hover:bg-zinc-800 text-[#E2F124] text-xs font-bold py-2.5 px-3 rounded-xl border border-zinc-700 transition cursor-pointer">
+        Actualiser maintenant
       </button>
     </div>
 
     <!-- Liste des e-mails capturés + Export CSV -->
     <div>
       <div class="flex items-center justify-between text-xs text-zinc-400 mb-1.5">
-        <span>E-mails enregistrés (<span id="admin-leads-count">0</span>)</span>
+        <span>E-mails enregistrés sur cet appareil (<span id="admin-leads-count">0</span>)</span>
         <button type="button" onclick="exportLeadsCSV()" class="text-[#E2F124] hover:underline font-semibold cursor-pointer">
           Exporter CSV
         </button>
@@ -419,42 +424,118 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- LOGIQUE JAVASCRIPT : SUIVI CACHÉ, SYNCHRO ONGLETS & MODE CRÉATEUR     -->
+  <!-- LOGIQUE JAVASCRIPT : SYNCHRONISATION CLOUD MULTI-APPAREILS EN DIRECT  -->
   <!-- ===================================================================== -->
   <script>
-    const STORAGE_KEY_STATS = 'kvaline_fakedoor_stats_v3';
+    const STORAGE_KEY_STATS = 'kvaline_fakedoor_stats_cloud_v1';
     const STORAGE_KEY_LEADS = 'kvaline_fakedoor_leads_v3';
-    const SESSION_VIEW_FLAG = 'kvaline_fakedoor_viewed_session_v3';
+    const SESSION_VIEW_FLAG = 'kvaline_fakedoor_viewed_cloud_v1';
 
-    const DEFAULT_STATS = {
-      interested: 710,
-      buyers: 241
+    // Base de départ (710 intéressés / 241 prêts à acheter) + incréments cloud en temps réel
+    const BASE_INTERESTED = 710;
+    const BASE_BUYERS = 241;
+
+    // Espace cloud partagé gratuit (synchronise iPhone, Android et PC sans serveur)
+    const CLOUD_NAMESPACE = 'kvaline-boissons-jury-2026';
+    const CLOUD_INTERESTED_KEY = 'interested-clicks';
+    const CLOUD_BUYERS_KEY = 'buyers-clicks';
+    const CLOUD_BASE_URL = `https://api.counterapi.dev/v1/${CLOUD_NAMESPACE}`;
+
+    let currentStats = {
+      interested: BASE_INTERESTED,
+      buyers: BASE_BUYERS
     };
 
     let selectedEdition = 'gilet';
     const UNIT_PACK_PRICE = 30;
+    let pollInterval = null;
 
-    // Vérification du paramètre d'URL ?admin=kvaline2026
     const urlParams = new URLSearchParams(window.location.search);
     const hasAdminParam = urlParams.get('admin') === 'kvaline2026';
 
-    function getStats() {
+    // Lecture/sauvegarde locale de secours (si hors-ligne)
+    function loadCachedStats() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY_STATS);
-        if (!raw) return { ...DEFAULT_STATS };
-        const parsed = JSON.parse(raw);
-        return {
-          interested: typeof parsed.interested === 'number' ? parsed.interested : DEFAULT_STATS.interested,
-          buyers: typeof parsed.buyers === 'number' ? parsed.buyers : DEFAULT_STATS.buyers
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (typeof parsed.interested === 'number') currentStats.interested = parsed.interested;
+          if (typeof parsed.buyers === 'number') currentStats.buyers = parsed.buyers;
+        }
+      } catch (e) {}
+      renderStats(currentStats, false);
+    }
+
+    function saveCachedStats(stats) {
+      try {
+        localStorage.setItem(STORAGE_KEY_STATS, JSON.stringify(stats));
+      } catch (e) {}
+    }
+
+    // Appel API Cloud pour lire ou incrémenter un compteur partagé
+    async function fetchCloudCounter(key, increment = false) {
+      const endpoint = increment ? `${CLOUD_BASE_URL}/${key}/up` : `${CLOUD_BASE_URL}/${key}/`;
+      const response = await fetch(endpoint, { cache: 'no-store' });
+      if (!response.ok) throw new Error('Cloud sync unavailable');
+      const data = await response.json();
+      return typeof data.count === 'number' ? data.count : 0;
+    }
+
+    // Synchronisation complète des deux compteurs depuis le cloud
+    async function syncCloudStats(animateOnChange = true) {
+      const badge = document.getElementById('cloud-sync-badge');
+      try {
+        const [cloudInterested, cloudBuyers] = await Promise.all([
+          fetchCloudCounter(CLOUD_INTERESTED_KEY, false),
+          fetchCloudCounter(CLOUD_BUYERS_KEY, false)
+        ]);
+
+        const nextInterested = BASE_INTERESTED + cloudInterested;
+        const nextBuyers = BASE_BUYERS + cloudBuyers;
+        const hasChanged = nextInterested !== currentStats.interested || nextBuyers !== currentStats.buyers;
+
+        currentStats = {
+          interested: nextInterested,
+          buyers: nextBuyers
         };
+        saveCachedStats(currentStats);
+        renderStats(currentStats, animateOnChange && hasChanged);
+
+        if (badge) {
+          badge.textContent = '● Cloud Live';
+          badge.className = 'text-[9px] uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold';
+        }
       } catch (e) {
-        return { ...DEFAULT_STATS };
+        if (badge) {
+          badge.textContent = '● Hors-ligne';
+          badge.className = 'text-[9px] uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold';
+        }
       }
     }
 
-    function saveStats(stats) {
-      localStorage.setItem(STORAGE_KEY_STATS, JSON.stringify(stats));
-      renderStats(stats, true);
+    // Incrémentation cloud + mise à jour immédiate de l'affichage
+    async function incrementCloudStat(type) {
+      if (type === 'interested') {
+        currentStats.interested += 1;
+      } else if (type === 'buyers') {
+        currentStats.buyers += 1;
+      }
+      saveCachedStats(currentStats);
+      renderStats(currentStats, true);
+
+      try {
+        const key = type === 'interested' ? CLOUD_INTERESTED_KEY : CLOUD_BUYERS_KEY;
+        const newCloudCount = await fetchCloudCounter(key, true);
+        if (type === 'interested') {
+          currentStats.interested = BASE_INTERESTED + newCloudCount;
+        } else {
+          currentStats.buyers = BASE_BUYERS + newCloudCount;
+        }
+        saveCachedStats(currentStats);
+        renderStats(currentStats, false);
+      } catch (e) {
+        // Garde la valeur locale si le réseau coupe momentanément
+      }
     }
 
     function getLeads() {
@@ -473,27 +554,31 @@
       renderLeads();
     }
 
-    // Actualisation des compteurs dans le panneau Mode Créateur
+    // Actualisation des chiffres dans le panneau Mode Créateur
     function renderStats(stats, animate = false) {
       const interestedEl = document.getElementById('admin-interested');
       const buyersEl = document.getElementById('admin-buyers');
       const rateEl = document.getElementById('admin-rate');
 
       if (interestedEl) {
-        interestedEl.textContent = stats.interested;
-        if (animate) {
-          interestedEl.classList.remove('animate-pop');
-          void interestedEl.offsetWidth;
-          interestedEl.classList.add('animate-pop');
+        if (interestedEl.textContent !== String(stats.interested)) {
+          interestedEl.textContent = stats.interested;
+          if (animate) {
+            interestedEl.classList.remove('animate-pop');
+            void interestedEl.offsetWidth;
+            interestedEl.classList.add('animate-pop');
+          }
         }
       }
 
       if (buyersEl) {
-        buyersEl.textContent = stats.buyers;
-        if (animate) {
-          buyersEl.classList.remove('animate-pop');
-          void buyersEl.offsetWidth;
-          buyersEl.classList.add('animate-pop');
+        if (buyersEl.textContent !== String(stats.buyers)) {
+          buyersEl.textContent = stats.buyers;
+          if (animate) {
+            buyersEl.classList.remove('animate-pop');
+            void buyersEl.offsetWidth;
+            buyersEl.classList.add('animate-pop');
+          }
         }
       }
 
@@ -528,13 +613,11 @@
       `).join('');
     }
 
-    // Ouverture de la modale de précommande + incrémentation cachée "Prêts à acheter"
+    // Ouverture de la modale de précommande + incrémentation cloud "Prêts à acheter"
     function openCheckoutModal(edition) {
       if (edition) selectedEdition = edition;
 
-      const stats = getStats();
-      stats.buyers += 1;
-      saveStats(stats);
+      incrementCloudStat('buyers');
 
       const editionLabel = selectedEdition === 'gilet'
         ? 'KVALINE — Édition Gilet Jaune (12 × 50 cl)'
@@ -578,14 +661,26 @@
       document.getElementById('modal-success-state').classList.remove('hidden');
     }
 
-    // Contrôles du panneau secret Mode Créateur
+    // Rafraîchissement automatique toutes les 4 secondes quand le panneau créateur est ouvert
+    function startLivePolling() {
+      if (pollInterval) clearInterval(pollInterval);
+      pollInterval = setInterval(() => {
+        const drawer = document.getElementById('creator-drawer');
+        if (drawer && !drawer.classList.contains('hidden')) {
+          syncCloudStats(true);
+        }
+      }, 4000);
+    }
+
     function toggleCreatorDrawer() {
       const drawer = document.getElementById('creator-drawer');
       const isHidden = drawer.classList.contains('hidden');
       if (isHidden) {
-        renderStats(getStats(), false);
+        renderStats(currentStats, false);
         renderLeads();
         drawer.classList.remove('hidden');
+        syncCloudStats(true);
+        startLivePolling();
       } else {
         drawer.classList.add('hidden');
       }
@@ -596,9 +691,7 @@
     }
 
     function simulateNewVisitor() {
-      const stats = getStats();
-      stats.interested += 1;
-      saveStats(stats);
+      incrementCloudStat('interested');
     }
 
     function exportLeadsCSV() {
@@ -614,14 +707,6 @@
       a.download = 'kvaline_leads_fakedoor.csv';
       a.click();
       URL.revokeObjectURL(url);
-    }
-
-    function resetDemoStats() {
-      localStorage.setItem(STORAGE_KEY_STATS, JSON.stringify({ ...DEFAULT_STATS }));
-      localStorage.removeItem(STORAGE_KEY_LEADS);
-      sessionStorage.removeItem(SESSION_VIEW_FLAG);
-      renderStats({ ...DEFAULT_STATS }, true);
-      renderLeads();
     }
 
     // Raccourci clavier Ctrl+M ou Cmd+M pour ouvrir/fermer le Mode Créateur
@@ -648,34 +733,21 @@
       }
     });
 
-    // Synchronisation temps réel entre onglets via storage event
-    window.addEventListener('storage', (event) => {
-      if (event.key === STORAGE_KEY_STATS) {
-        renderStats(getStats(), true);
-      }
-      if (event.key === STORAGE_KEY_LEADS) {
-        renderLeads();
-      }
-    });
-
     // Initialisation au chargement de la page
-    window.addEventListener('DOMContentLoaded', () => {
-      const currentStats = getStats();
-
-      // Incrémente "intéressés" de +1 une fois par session (sauf si ouvert directement en ?admin=kvaline2026)
-      if (!hasAdminParam && !sessionStorage.getItem(SESSION_VIEW_FLAG)) {
-        currentStats.interested += 1;
-        sessionStorage.setItem(SESSION_VIEW_FLAG, '1');
-        saveStats(currentStats);
-      } else {
-        renderStats(currentStats, false);
-      }
-
+    window.addEventListener('DOMContentLoaded', async () => {
+      loadCachedStats();
       renderLeads();
 
-      // Ouvre automatiquement le Mode Créateur si ?admin=kvaline2026 est présent dans l'URL
       if (hasAdminParam) {
         document.getElementById('creator-drawer').classList.remove('hidden');
+        await syncCloudStats(false);
+        startLivePolling();
+      } else if (!sessionStorage.getItem(SESSION_VIEW_FLAG)) {
+        sessionStorage.setItem(SESSION_VIEW_FLAG, '1');
+        await incrementCloudStat('interested');
+        await syncCloudStats(false);
+      } else {
+        await syncCloudStats(false);
       }
     });
   </script>
