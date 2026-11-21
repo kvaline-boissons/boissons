@@ -361,7 +361,7 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- PANNEAU SECRET "MODE CRÉATEUR" (SYNCHRONISÉ EN TEMPS RÉEL VIA CLOUD)  -->
+  <!-- PANNEAU SECRET "MODE CRÉATEUR" (SYNCHRONISÉ VIA FIREBASE EN DIRECT)   -->
   <!-- Activable via ?admin=kvaline2026, Ctrl+M / Cmd+M ou triple-clic logo  -->
   <!-- ===================================================================== -->
   <div id="creator-drawer" class="hidden fixed bottom-5 right-5 z-50 w-[92vw] max-w-md bg-zinc-950 text-white rounded-3xl p-5 shadow-2xl border-2 border-[#E2F124]/70">
@@ -370,7 +370,7 @@
         <div class="flex items-center gap-2">
           <span class="text-[10px] uppercase tracking-widest text-[#E2F124] font-bold">Tableau de bord privé · Ctrl+M</span>
           <span id="cloud-sync-badge" class="text-[9px] uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
-            ● Cloud Live
+            ● Firebase Live
           </span>
         </div>
         <h4 class="font-display font-extrabold text-lg mt-0.5">Mode Créateur — Stats Live</h4>
@@ -403,16 +403,16 @@
               class="bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold py-2.5 px-3 rounded-xl border border-zinc-700 transition cursor-pointer">
         Simuler un nouveau client
       </button>
-      <button type="button" onclick="syncCloudStats(true)"
-              class="bg-zinc-900 hover:bg-zinc-800 text-[#E2F124] text-xs font-bold py-2.5 px-3 rounded-xl border border-zinc-700 transition cursor-pointer">
-        Actualiser maintenant
+      <button type="button" onclick="resetFirebaseStats()"
+              class="bg-zinc-900 hover:bg-red-950/60 text-zinc-300 hover:text-red-300 text-xs font-bold py-2.5 px-3 rounded-xl border border-zinc-700 transition cursor-pointer">
+        Réinitialiser à 710 / 241
       </button>
     </div>
 
     <!-- Liste des e-mails capturés + Export CSV -->
     <div>
       <div class="flex items-center justify-between text-xs text-zinc-400 mb-1.5">
-        <span>E-mails enregistrés sur cet appareil (<span id="admin-leads-count">0</span>)</span>
+        <span>E-mails enregistrés (<span id="admin-leads-count">0</span>)</span>
         <button type="button" onclick="exportLeadsCSV()" class="text-[#E2F124] hover:underline font-semibold cursor-pointer">
           Exporter CSV
         </button>
@@ -424,28 +424,21 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- LOGIQUE JAVASCRIPT : SYNCHRONISATION CLOUD MULTI-APPAREILS EN DIRECT  -->
+  <!-- LOGIQUE JAVASCRIPT : SYNCHRONISATION FIREBASE REALTIME DATABASE        -->
   <!-- ===================================================================== -->
   <script>
-    const STORAGE_KEY_STATS = 'kvaline_fakedoor_stats_cloud_v1';
-    const STORAGE_KEY_LEADS = 'kvaline_fakedoor_leads_v3';
-    const SESSION_VIEW_FLAG = 'kvaline_fakedoor_viewed_cloud_v1';
+    const FIREBASE_DB_URL = 'https://kvaline-4d4a4-default-rtdb.firebaseio.com';
+    const STORAGE_KEY_STATS = 'kvaline_firebase_stats_cache_v1';
+    const STORAGE_KEY_LEADS = 'kvaline_firebase_leads_cache_v1';
+    const SESSION_VIEW_FLAG = 'kvaline_firebase_viewed_session_v1';
 
-    // Base de départ (710 intéressés / 241 prêts à acheter) + incréments cloud en temps réel
-    const BASE_INTERESTED = 710;
-    const BASE_BUYERS = 241;
-
-    // Espace cloud partagé gratuit (synchronise iPhone, Android et PC sans serveur)
-    const CLOUD_NAMESPACE = 'kvaline-boissons-jury-2026';
-    const CLOUD_INTERESTED_KEY = 'interested-clicks';
-    const CLOUD_BUYERS_KEY = 'buyers-clicks';
-    const CLOUD_BASE_URL = `https://api.counterapi.dev/v1/${CLOUD_NAMESPACE}`;
-
-    let currentStats = {
-      interested: BASE_INTERESTED,
-      buyers: BASE_BUYERS
+    const DEFAULT_STATS = {
+      interested: 710,
+      buyers: 241
     };
 
+    let currentStats = { ...DEFAULT_STATS };
+    let currentLeads = [];
     let selectedEdition = 'gilet';
     const UNIT_PACK_PRICE = 30;
     let pollInterval = null;
@@ -453,108 +446,121 @@
     const urlParams = new URLSearchParams(window.location.search);
     const hasAdminParam = urlParams.get('admin') === 'kvaline2026';
 
-    // Lecture/sauvegarde locale de secours (si hors-ligne)
-    function loadCachedStats() {
+    function setCloudBadge(online) {
+      const badge = document.getElementById('cloud-sync-badge');
+      if (!badge) return;
+      if (online) {
+        badge.textContent = '● Firebase Live';
+        badge.className = 'text-[9px] uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold';
+      } else {
+        badge.textContent = '● Hors-ligne';
+        badge.className = 'text-[9px] uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold';
+      }
+    }
+
+    function loadLocalCache() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY_STATS);
-        if (raw) {
-          const parsed = JSON.parse(raw);
+        const rawStats = localStorage.getItem(STORAGE_KEY_STATS);
+        if (rawStats) {
+          const parsed = JSON.parse(rawStats);
           if (typeof parsed.interested === 'number') currentStats.interested = parsed.interested;
           if (typeof parsed.buyers === 'number') currentStats.buyers = parsed.buyers;
         }
+        const rawLeads = localStorage.getItem(STORAGE_KEY_LEADS);
+        if (rawLeads) currentLeads = JSON.parse(rawLeads);
       } catch (e) {}
       renderStats(currentStats, false);
-    }
-
-    function saveCachedStats(stats) {
-      try {
-        localStorage.setItem(STORAGE_KEY_STATS, JSON.stringify(stats));
-      } catch (e) {}
-    }
-
-    // Appel API Cloud pour lire ou incrémenter un compteur partagé
-    async function fetchCloudCounter(key, increment = false) {
-      const endpoint = increment ? `${CLOUD_BASE_URL}/${key}/up` : `${CLOUD_BASE_URL}/${key}/`;
-      const response = await fetch(endpoint, { cache: 'no-store' });
-      if (!response.ok) throw new Error('Cloud sync unavailable');
-      const data = await response.json();
-      return typeof data.count === 'number' ? data.count : 0;
-    }
-
-    // Synchronisation complète des deux compteurs depuis le cloud
-    async function syncCloudStats(animateOnChange = true) {
-      const badge = document.getElementById('cloud-sync-badge');
-      try {
-        const [cloudInterested, cloudBuyers] = await Promise.all([
-          fetchCloudCounter(CLOUD_INTERESTED_KEY, false),
-          fetchCloudCounter(CLOUD_BUYERS_KEY, false)
-        ]);
-
-        const nextInterested = BASE_INTERESTED + cloudInterested;
-        const nextBuyers = BASE_BUYERS + cloudBuyers;
-        const hasChanged = nextInterested !== currentStats.interested || nextBuyers !== currentStats.buyers;
-
-        currentStats = {
-          interested: nextInterested,
-          buyers: nextBuyers
-        };
-        saveCachedStats(currentStats);
-        renderStats(currentStats, animateOnChange && hasChanged);
-
-        if (badge) {
-          badge.textContent = '● Cloud Live';
-          badge.className = 'text-[9px] uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold';
-        }
-      } catch (e) {
-        if (badge) {
-          badge.textContent = '● Hors-ligne';
-          badge.className = 'text-[9px] uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold';
-        }
-      }
-    }
-
-    // Incrémentation cloud + mise à jour immédiate de l'affichage
-    async function incrementCloudStat(type) {
-      if (type === 'interested') {
-        currentStats.interested += 1;
-      } else if (type === 'buyers') {
-        currentStats.buyers += 1;
-      }
-      saveCachedStats(currentStats);
-      renderStats(currentStats, true);
-
-      try {
-        const key = type === 'interested' ? CLOUD_INTERESTED_KEY : CLOUD_BUYERS_KEY;
-        const newCloudCount = await fetchCloudCounter(key, true);
-        if (type === 'interested') {
-          currentStats.interested = BASE_INTERESTED + newCloudCount;
-        } else {
-          currentStats.buyers = BASE_BUYERS + newCloudCount;
-        }
-        saveCachedStats(currentStats);
-        renderStats(currentStats, false);
-      } catch (e) {
-        // Garde la valeur locale si le réseau coupe momentanément
-      }
-    }
-
-    function getLeads() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY_LEADS);
-        return raw ? JSON.parse(raw) : [];
-      } catch (e) {
-        return [];
-      }
-    }
-
-    function saveLead(lead) {
-      const leads = getLeads();
-      leads.unshift(lead);
-      localStorage.setItem(STORAGE_KEY_LEADS, JSON.stringify(leads));
       renderLeads();
     }
 
-    // Actualisation des chiffres dans le panneau Mode Créateur
+    function saveLocalCache() {
+      try {
+        localStorage.setItem(STORAGE_KEY_STATS, JSON.stringify(currentStats));
+        localStorage.setItem(STORAGE_KEY_LEADS, JSON.stringify(currentLeads));
+      } catch (e) {}
+    }
+
+    // Lecture complète depuis Firebase Realtime Database
+    async function syncFromFirebase(animateOnChange = true) {
+      try {
+        const res = await fetch(`${FIREBASE_DB_URL}/kvaline.json`, { cache: 'no-store' });
+        if (!res.ok) throw new Error('Firebase read error');
+        const data = await res.json();
+
+        if (!data || !data.stats) {
+          await fetch(`${FIREBASE_DB_URL}/kvaline/stats.json`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(DEFAULT_STATS)
+          });
+          currentStats = { ...DEFAULT_STATS };
+        } else {
+          const nextInterested = typeof data.stats.interested === 'number' ? data.stats.interested : DEFAULT_STATS.interested;
+          const nextBuyers = typeof data.stats.buyers === 'number' ? data.stats.buyers : DEFAULT_STATS.buyers;
+          const changed = nextInterested !== currentStats.interested || nextBuyers !== currentStats.buyers;
+          currentStats = { interested: nextInterested, buyers: nextBuyers };
+          renderStats(currentStats, animateOnChange && changed);
+        }
+
+        if (data && data.leads) {
+          currentLeads = Object.values(data.leads).reverse();
+        } else {
+          currentLeads = [];
+        }
+
+        renderLeads();
+        saveLocalCache();
+        setCloudBadge(true);
+      } catch (e) {
+        setCloudBadge(false);
+      }
+    }
+
+    // Incrémentation atomique côté serveur Firebase (ServerValue.increment)
+    async function incrementFirebaseField(field) {
+      currentStats[field] += 1;
+      saveLocalCache();
+      renderStats(currentStats, true);
+
+      try {
+        const res = await fetch(`${FIREBASE_DB_URL}/kvaline/stats/${field}.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          keepalive: true,
+          body: JSON.stringify({ '.sv': { 'increment': 1 } })
+        });
+        if (!res.ok) throw new Error('Firebase increment error');
+        const updatedValue = await res.json();
+        if (typeof updatedValue === 'number') {
+          currentStats[field] = updatedValue;
+          saveLocalCache();
+          renderStats(currentStats, false);
+        }
+        setCloudBadge(true);
+      } catch (e) {
+        setCloudBadge(false);
+      }
+    }
+
+    // Enregistrement d'un lead (e-mail) dans Firebase pour qu'il apparaisse aussi sur le PC
+    async function pushLeadToFirebase(lead) {
+      currentLeads.unshift(lead);
+      saveLocalCache();
+      renderLeads();
+
+      try {
+        await fetch(`${FIREBASE_DB_URL}/kvaline/leads.json`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          keepalive: true,
+          body: JSON.stringify(lead)
+        });
+        setCloudBadge(true);
+      } catch (e) {
+        setCloudBadge(false);
+      }
+    }
+
     function renderStats(stats, animate = false) {
       const interestedEl = document.getElementById('admin-interested');
       const buyersEl = document.getElementById('admin-buyers');
@@ -591,18 +597,17 @@
     }
 
     function renderLeads() {
-      const leads = getLeads();
       const countEl = document.getElementById('admin-leads-count');
       const listEl = document.getElementById('admin-leads-list');
-      if (countEl) countEl.textContent = leads.length;
+      if (countEl) countEl.textContent = currentLeads.length;
       if (!listEl) return;
 
-      if (leads.length === 0) {
+      if (currentLeads.length === 0) {
         listEl.innerHTML = '<p class="text-zinc-500 italic text-center py-2">Aucun e-mail enregistré pour le moment.</p>';
         return;
       }
 
-      listEl.innerHTML = leads.map(item => `
+      listEl.innerHTML = currentLeads.map(item => `
         <div class="flex items-center justify-between bg-zinc-950 px-2.5 py-2 rounded-lg border border-zinc-800">
           <div class="truncate pr-2">
             <span class="font-bold text-white block truncate">${item.email}</span>
@@ -613,11 +618,10 @@
       `).join('');
     }
 
-    // Ouverture de la modale de précommande + incrémentation cloud "Prêts à acheter"
     function openCheckoutModal(edition) {
       if (edition) selectedEdition = edition;
 
-      incrementCloudStat('buyers');
+      incrementFirebaseField('buyers');
 
       const editionLabel = selectedEdition === 'gilet'
         ? 'KVALINE — Édition Gilet Jaune (12 × 50 cl)'
@@ -650,7 +654,7 @@
       const now = new Date();
       const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-      saveLead({
+      pushLeadToFirebase({
         email,
         pack: `${editionName} (12 × 50 cl) · ${UNIT_PACK_PRICE} €`,
         time: timeStr
@@ -661,15 +665,14 @@
       document.getElementById('modal-success-state').classList.remove('hidden');
     }
 
-    // Rafraîchissement automatique toutes les 4 secondes quand le panneau créateur est ouvert
     function startLivePolling() {
       if (pollInterval) clearInterval(pollInterval);
       pollInterval = setInterval(() => {
         const drawer = document.getElementById('creator-drawer');
         if (drawer && !drawer.classList.contains('hidden')) {
-          syncCloudStats(true);
+          syncFromFirebase(true);
         }
-      }, 4000);
+      }, 2500);
     }
 
     function toggleCreatorDrawer() {
@@ -679,7 +682,7 @@
         renderStats(currentStats, false);
         renderLeads();
         drawer.classList.remove('hidden');
-        syncCloudStats(true);
+        syncFromFirebase(true);
         startLivePolling();
       } else {
         drawer.classList.add('hidden');
@@ -691,13 +694,32 @@
     }
 
     function simulateNewVisitor() {
-      incrementCloudStat('interested');
+      incrementFirebaseField('interested');
+    }
+
+    async function resetFirebaseStats() {
+      currentStats = { ...DEFAULT_STATS };
+      currentLeads = [];
+      sessionStorage.removeItem(SESSION_VIEW_FLAG);
+      saveLocalCache();
+      renderStats(currentStats, true);
+      renderLeads();
+
+      try {
+        await fetch(`${FIREBASE_DB_URL}/kvaline.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ stats: DEFAULT_STATS, leads: null })
+        });
+        setCloudBadge(true);
+      } catch (e) {
+        setCloudBadge(false);
+      }
     }
 
     function exportLeadsCSV() {
-      const leads = getLeads();
       const csvRows = ['Email,Edition,Horodatage'];
-      leads.forEach(l => {
+      currentLeads.forEach(l => {
         csvRows.push(`"${l.email.replace(/"/g, '""')}","${l.pack.replace(/"/g, '""')}","${l.time}"`);
       });
       const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
@@ -709,7 +731,6 @@
       URL.revokeObjectURL(url);
     }
 
-    // Raccourci clavier Ctrl+M ou Cmd+M pour ouvrir/fermer le Mode Créateur
     document.addEventListener('keydown', (event) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'm') {
         event.preventDefault();
@@ -717,7 +738,6 @@
       }
     });
 
-    // Triple-clic sur le logo KVALINE pour ouvrir/fermer le Mode Créateur
     let logoClickCount = 0;
     let logoClickTimer = null;
     document.getElementById('brand-logo').addEventListener('click', () => {
@@ -733,21 +753,16 @@
       }
     });
 
-    // Initialisation au chargement de la page
     window.addEventListener('DOMContentLoaded', async () => {
-      loadCachedStats();
-      renderLeads();
+      loadLocalCache();
+      await syncFromFirebase(false);
 
       if (hasAdminParam) {
         document.getElementById('creator-drawer').classList.remove('hidden');
-        await syncCloudStats(false);
         startLivePolling();
       } else if (!sessionStorage.getItem(SESSION_VIEW_FLAG)) {
         sessionStorage.setItem(SESSION_VIEW_FLAG, '1');
-        await incrementCloudStat('interested');
-        await syncCloudStats(false);
-      } else {
-        await syncCloudStats(false);
+        await incrementFirebaseField('interested');
       }
     });
   </script>
