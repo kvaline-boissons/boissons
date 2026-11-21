@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KVALINE — La Pinte Sans Alcool | Kvass Artisanal au Pain de Seigle</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@700;800&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0e0e0f;
+      color: #f4f4f5;
+    }
+    .font-display {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.3); }
+    }
+    .animate-pulse-dot {
+      animation: pulse-dot 1.8s infinite ease-in-out;
+    }
+    @keyframes pop-number {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.25); color: #E2F124; }
+      100% { transform: scale(1); }
+    }
+    .animate-pop {
+      animation: pop-number 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-[#E2F124] selection:text-black min-h-screen flex flex-col">
+
+  <!-- En-tête sombre sobre (zéro statistique côté client, triple-clic logo = Mode Créateur) -->
+  <header class="sticky top-0 z-40 bg-[#0e0e0f]/95 backdrop-blur-md border-b border-zinc-800/90">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <!-- Logo KVALINE (triple-clic active/désactive le Mode Créateur) -->
+      <div id="brand-logo" title="KVALINE — La pinte sans alcool"
+           class="flex items-center gap-3 cursor-pointer select-none group">
+        <div class="w-9 h-9 rounded-xl bg-[#E2F124] text-[#0e0e0f] font-display font-extrabold text-lg flex items-center justify-center tracking-tighter shadow-sm group-hover:scale-105 transition">
+          KV
+        </div>
+        <div>
+          <span class="font-display font-extrabold text-xl tracking-tight text-white block leading-none">KVALINE</span>
+          <span class="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">La pinte sans alcool</span>
+        </div>
+      </div>
+
+      <!-- Badge artisanal -->
+      <div class="flex items-center gap-2 bg-zinc-900/90 border border-zinc-800 px-3 sm:px-4 py-1.5 rounded-full text-[11px] sm:text-xs font-medium text-zinc-300">
+        <span class="w-2 h-2 rounded-full bg-[#E2F124] animate-pulse-dot shrink-0"></span>
+        <span>&lt; 0,5 % vol. · Brassé en France · Pain de seigle recyclé</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenu principal : Grille des 2 packs côte à côte -->
+  <main class="max-w-5xl mx-auto w-full px-4 sm:px-6 py-8 sm:py-12 flex-1">
+    
+    <!-- Titre sobre -->
+    <div class="text-center max-w-2xl mx-auto mb-8 sm:mb-10 space-y-2.5">
+      <p class="text-xs uppercase tracking-[0.2em] text-[#E2F124] font-bold">
+        Kvass pétillant au pain de seigle recyclé toasté · Brasserie locale
+      </p>
+      <h1 class="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
+        Choisissez votre édition
+      </h1>
+      <p class="text-zinc-400 text-sm sm:text-base leading-relaxed">
+        Packs de <strong class="text-zinc-200">12 canettes de 50 cl</strong> (non mélangeables) · Tarif unique <strong class="text-zinc-200">30,00 €</strong>
+      </p>
+    </div>
+
+    <!-- Grille des 2 cartes produits -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-stretch">
+
+      <!-- =============================================================== -->
+      <!-- PACK 1 : KVALINE — ÉDITION GILET JAUNE (Fond #2b2b2b)           -->
+      <!-- =============================================================== -->
+      <article class="bg-zinc-900/80 border border-zinc-800 rounded-3xl p-4 sm:p-5 shadow-xl flex flex-col justify-between hover:border-zinc-700 transition">
+        <div>
+          <!-- Visuel canette jaune fluo sur fond gris anthracite #2b2b2b -->
+          <div class="relative rounded-2xl overflow-hidden bg-[#2b2b2b] p-6 flex flex-col items-center justify-center min-h-[350px] border border-zinc-800/60">
+            <span class="absolute top-3.5 left-3.5 bg-[#E2F124] text-[#0e0e0f] text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full shadow-sm">
+              12 × 50 cl
+            </span>
+            <span class="absolute top-3.5 right-3.5 bg-black/45 text-zinc-200 text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-xs">
+              &lt; 0,5 % vol.
+            </span>
+
+            <!-- Illustration SVG haute fidélité Canette Édition Gilet Jaune -->
+            <svg width="150" height="275" viewBox="0 0 160 295" fill="none" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-[0_20px_24px_rgba(0,0,0,0.75)]">
+              <defs>
+                <linearGradient id="aluTop1" x1="0" y1="0" x2="160" y2="0" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#8E95A0"/>
+                  <stop offset="25%" stop-color="#F3F4F6"/>
+                  <stop offset="50%" stop-color="#D1D5DB"/>
+                  <stop offset="80%" stop-color="#6B7280"/>
+                  <stop offset="100%" stop-color="#9CA3AF"/>
+                </linearGradient>
+                <linearGradient id="canSheen1" x1="0" y1="0" x2="160" y2="0" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#000000" stop-opacity="0.34"/>
+                  <stop offset="22%" stop-color="#FFFFFF" stop-opacity="0.24"/>
+                  <stop offset="46%" stop-color="#FFFFFF" stop-opacity="0.02"/>
+                  <stop offset="82%" stop-color="#000000" stop-opacity="0.28"/>
+                  <stop offset="100%" stop-color="#000000" stop-opacity="0.42"/>
+                </linearGradient>
+                <pattern id="knitPattern1" width="4" height="4" patternUnits="userSpaceOnUse">
+                  <path d="M0 0L2 2M4 0L2 2M0 4L2 2M4 4L2 2" stroke="#262626" stroke-width="0.6"/>
+                </pattern>
+                <clipPath id="canClip1">
+                  <path d="M22 28 L138 28 L138 268 Q138 276 126 278 L34 278 Q22 276 22 268 Z"/>
+                </clipPath>
+              </defs>
+
+              <!-- Col & base aluminium -->
+              <path d="M36 10 L124 10 L138 28 L22 28 Z" fill="url(#aluTop1)"/>
+              <rect x="34" y="6" width="92" height="5" rx="2.5" fill="#E5E7EB"/>
+              <path d="M24 276 L136 276 L126 289 L34 289 Z" fill="url(#aluTop1)"/>
+              
+              <g clip-path="url(#canClip1)">
+                <!-- Haut cagoule noire tricotée -->
+                <rect x="22" y="28" width="116" height="78" fill="#141414"/>
+                <rect x="22" y="28" width="116" height="78" fill="url(#knitPattern1)"/>
+                <!-- Ouverture yeux -->
+                <rect x="38" y="48" width="84" height="36" rx="18" fill="#F1D5BD" stroke="#3F3F46" stroke-width="1.5" stroke-dasharray="3 2"/>
+                <!-- Sourcils -->
+                <path d="M51 58 L69 61" stroke="#1C1917" stroke-width="2.6" stroke-linecap="round"/>
+                <path d="M109 58 L91 61" stroke="#1C1917" stroke-width="2.6" stroke-linecap="round"/>
+                <!-- Yeux -->
+                <ellipse cx="61" cy="68" rx="8" ry="5.5" fill="#FFFFFF" stroke="#292524" stroke-width="1.2"/>
+                <circle cx="62" cy="68" r="3.5" fill="#3E2723"/>
+                <circle cx="63" cy="67" r="1.1" fill="#FFFFFF"/>
+                <ellipse cx="99" cy="68" rx="8" ry="5.5" fill="#FFFFFF" stroke="#292524" stroke-width="1.2"/>
+                <circle cx="98" cy="68" r="3.5" fill="#3E2723"/>
+                <circle cx="99" cy="67" r="1.1" fill="#FFFFFF"/>
+
+                <!-- Corps jaune fluo haute visibilité -->
+                <rect x="22" y="106" width="116" height="172" fill="#DCEB1F"/>
+                <!-- Bretelles et bandes réfléchissantes grises -->
+                <rect x="38" y="106" width="12" height="44" fill="#D1D5DB" opacity="0.9"/>
+                <rect x="110" y="106" width="12" height="44" fill="#D1D5DB" opacity="0.9"/>
+                <rect x="22" y="148" width="116" height="11" fill="#D1D5DB" opacity="0.92"/>
+                <rect x="22" y="198" width="116" height="11" fill="#D1D5DB" opacity="0.92"/>
+                
+                <!-- Inscriptions canette -->
+                <text x="80" y="132" text-anchor="middle" fill="#141413" font-family="Arial, sans-serif" font-weight="800" font-size="6.2" letter-spacing="0.4">★ LA PINTE SANS ALCOOL ★</text>
+                <text x="80" y="185" text-anchor="middle" fill="#141413" font-family="Space Grotesk, Arial, sans-serif" font-weight="900" font-size="22" letter-spacing="1">KVALINE</text>
+                <text x="80" y="220" text-anchor="middle" fill="#141413" font-family="Arial, sans-serif" font-weight="700" font-size="5.4" letter-spacing="0.3">KVASS PÉTILLANT AU PAIN TOASTÉ</text>
+                <text x="80" y="229" text-anchor="middle" fill="#141413" font-family="Arial, sans-serif" font-weight="700" font-size="5.2" letter-spacing="0.3">PEU SUCRÉ · 50 CL</text>
+                
+                <!-- Bandeau noir Édition Gilet Jaune -->
+                <rect x="22" y="236" width="116" height="18" fill="#141413"/>
+                <text x="80" y="248" text-anchor="middle" fill="#DCEB1F" font-family="Arial, sans-serif" font-weight="800" font-size="7.5" letter-spacing="0.8">ÉDITION GILET JAUNE</text>
+
+                <!-- Reflet cylindrique -->
+                <rect x="22" y="28" width="116" height="250" fill="url(#canSheen1)"/>
+              </g>
+            </svg>
+          </div>
+
+          <!-- Description & Prix Pack 1 -->
+          <div class="pt-5 pb-4 space-y-2">
+            <h2 class="font-display text-xl sm:text-2xl font-extrabold text-white">
+              KVALINE — Édition Gilet Jaune
+            </h2>
+            <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              Pack de <strong class="text-zinc-200">12 canettes de 50 cl</strong> (6 L) · Kvass pétillant au pain de seigle toasté recyclé, peu sucré.
+            </p>
+            <div class="pt-1 flex items-baseline gap-2.5">
+              <span class="font-display text-2xl sm:text-3xl font-extrabold text-white">30,00 €</span>
+              <span class="text-xs text-zinc-400">(soit 5,00 € / L · 2,50 € la pinte)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bouton Commander Pack 1 -->
+        <button type="button" onclick="openCheckoutModal('gilet')"
+                class="w-full bg-[#E2F124] hover:bg-[#d5e41d] active:scale-[0.99] text-[#0e0e0f] font-display font-extrabold text-base py-3.5 px-5 rounded-2xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
+          <span>Commander ce pack · 30,00 €</span>
+        </button>
+      </article>
+
+      <!-- =============================================================== -->
+      <!-- PACK 2 : KVALINE — ÉDITION CAGOULE (Fond beige clair #e5dfd5)   -->
+      <!-- =============================================================== -->
+      <article class="bg-zinc-900/80 border border-zinc-800 rounded-3xl p-4 sm:p-5 shadow-xl flex flex-col justify-between hover:border-zinc-700 transition">
+        <div>
+          <!-- Visuel canette noire texturée tricot sur fond beige clair #e5dfd5 -->
+          <div class="relative rounded-2xl overflow-hidden bg-[#e5dfd5] p-6 flex flex-col items-center justify-center min-h-[350px] border border-stone-300/60">
+            <span class="absolute top-3.5 left-3.5 bg-[#141413] text-white text-[11px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full shadow-sm">
+              12 × 50 cl
+            </span>
+            <span class="absolute top-3.5 right-3.5 bg-black/15 text-[#141413] text-[11px] font-bold px-2.5 py-1 rounded-full">
+              &lt; 0,5 % vol.
+            </span>
+
+            <!-- Illustration SVG haute fidélité Canette Édition Cagoule -->
+            <svg width="150" height="275" viewBox="0 0 160 295" fill="none" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-[0_20px_24px_rgba(20,20,19,0.35)]">
+              <defs>
+                <linearGradient id="aluTop2" x1="0" y1="0" x2="160" y2="0" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#8E95A0"/>
+                  <stop offset="25%" stop-color="#F9FAFB"/>
+                  <stop offset="50%" stop-color="#D1D5DB"/>
+                  <stop offset="80%" stop-color="#6B7280"/>
+                  <stop offset="100%" stop-color="#9CA3AF"/>
+                </linearGradient>
+                <linearGradient id="canSheen2" x1="0" y1="0" x2="160" y2="0" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#000000" stop-opacity="0.36"/>
+                  <stop offset="22%" stop-color="#FFFFFF" stop-opacity="0.22"/>
+                  <stop offset="46%" stop-color="#FFFFFF" stop-opacity="0.02"/>
+                  <stop offset="82%" stop-color="#000000" stop-opacity="0.3"/>
+                  <stop offset="100%" stop-color="#000000" stop-opacity="0.45"/>
+                </linearGradient>
+                <pattern id="knitPattern2" width="4" height="4" patternUnits="userSpaceOnUse">
+                  <path d="M0 0L2 2M4 0L2 2M0 4L2 2M4 4L2 2" stroke="#292929" stroke-width="0.65"/>
+                </pattern>
+                <clipPath id="canClip2">
+                  <path d="M22 28 L138 28 L138 268 Q138 276 126 278 L34 278 Q22 276 22 268 Z"/>
+                </clipPath>
+              </defs>
+
+              <!-- Col & base aluminium -->
+              <path d="M36 10 L124 10 L138 28 L22 28 Z" fill="url(#aluTop2)"/>
+              <rect x="34" y="6" width="92" height="5" rx="2.5" fill="#F3F4F6"/>
+              <path d="M24 276 L136 276 L126 289 L34 289 Z" fill="url(#aluTop2)"/>
+              
+              <g clip-path="url(#canClip2)">
+                <!-- Fond noir intégral texturé maille tricot -->
+                <rect x="22" y="28" width="116" height="250" fill="#141414"/>
+                <rect x="22" y="28" width="116" height="250" fill="url(#knitPattern2)"/>
+
+                <!-- Ouverture yeux -->
+                <rect x="38" y="48" width="84" height="36" rx="18" fill="#F1D5BD" stroke="#44403C" stroke-width="1.5" stroke-dasharray="3 2"/>
+                <!-- Sourcils -->
+                <path d="M51 58 L69 61" stroke="#1C1917" stroke-width="2.6" stroke-linecap="round"/>
+                <path d="M109 58 L91 61" stroke="#1C1917" stroke-width="2.6" stroke-linecap="round"/>
+                <!-- Yeux -->
+                <ellipse cx="61" cy="68" rx="8" ry="5.5" fill="#FFFFFF" stroke="#292524" stroke-width="1.2"/>
+                <circle cx="62" cy="68" r="3.5" fill="#3E2723"/>
+                <circle cx="63" cy="67" r="1.1" fill="#FFFFFF"/>
+                <ellipse cx="99" cy="68" rx="8" ry="5.5" fill="#FFFFFF" stroke="#292524" stroke-width="1.2"/>
+                <circle cx="98" cy="68" r="3.5" fill="#3E2723"/>
+                <circle cx="99" cy="67" r="1.1" fill="#FFFFFF"/>
+
+                <!-- Inscriptions canette -->
+                <text x="80" y="148" text-anchor="middle" fill="#F5F5F4" font-family="Space Grotesk, Arial, sans-serif" font-weight="900" font-size="22" letter-spacing="1">KVALINE</text>
+                <text x="80" y="166" text-anchor="middle" fill="#EF4444" font-family="Arial, sans-serif" font-weight="800" font-size="6.2" letter-spacing="0.4">★ <tspan fill="#F5F5F4">LA PINTE SANS ALCOOL</tspan> ★</text>
+                
+                <text x="80" y="198" text-anchor="middle" fill="#E7E5E4" font-family="Arial, sans-serif" font-weight="700" font-size="5.4" letter-spacing="0.3">KVASS PÉTILLANT AU PAIN TOASTÉ</text>
+                <text x="80" y="207" text-anchor="middle" fill="#D6D3D1" font-family="Arial, sans-serif" font-weight="700" font-size="5.2" letter-spacing="0.3">PEU SUCRÉ · 50 CL</text>
+
+                <!-- Bande rouge Édition Cagoule -->
+                <rect x="22" y="224" width="116" height="19" fill="#B91C1C"/>
+                <text x="80" y="236" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-weight="800" font-size="7.8" letter-spacing="0.9">ÉDITION CAGOULE</text>
+
+                <!-- Reflet cylindrique -->
+                <rect x="22" y="28" width="116" height="250" fill="url(#canSheen2)"/>
+              </g>
+            </svg>
+          </div>
+
+          <!-- Description & Prix Pack 2 -->
+          <div class="pt-5 pb-4 space-y-2">
+            <h2 class="font-display text-xl sm:text-2xl font-extrabold text-white">
+              KVALINE — Édition Cagoule
+            </h2>
+            <p class="text-xs sm:text-sm text-zinc-400 leading-relaxed">
+              Pack de <strong class="text-zinc-200">12 canettes de 50 cl</strong> (6 L) · Kvass pétillant au pain de seigle toasté recyclé, peu sucré.
+            </p>
+            <div class="pt-1 flex items-baseline gap-2.5">
+              <span class="font-display text-2xl sm:text-3xl font-extrabold text-white">30,00 €</span>
+              <span class="text-xs text-zinc-400">(soit 5,00 € / L · 2,50 € la pinte)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bouton Commander Pack 2 -->
+        <button type="button" onclick="openCheckoutModal('cagoule')"
+                class="w-full bg-[#E2F124] hover:bg-[#d5e41d] active:scale-[0.99] text-[#0e0e0f] font-display font-extrabold text-base py-3.5 px-5 rounded-2xl shadow-lg transition flex items-center justify-center gap-2 cursor-pointer">
+          <span>Commander ce pack · 30,00 €</span>
+        </button>
+      </article>
+
+    </div>
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- MODALE DE PRÉCOMMANDE SOBRE (AUCUN COMPTEUR NI REMISE)                -->
+  <!-- ===================================================================== -->
+  <div id="checkout-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-xs p-4">
+    <div class="bg-zinc-900 text-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-zinc-800 relative">
+      
+      <!-- Bouton Fermer -->
+      <button type="button" onclick="closeCheckoutModal()" aria-label="Fermer"
+              class="absolute top-4 right-4 w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center font-bold text-sm cursor-pointer">
+        ✕
+      </button>
+
+      <!-- État 1 : Formulaire d'alerte prioritaire -->
+      <div id="modal-form-state">
+        <div class="inline-flex items-center gap-2 bg-[#E2F124]/15 text-[#E2F124] text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-full mb-3 border border-[#E2F124]/30">
+          <span>Premier brassin épuisé</span>
+        </div>
+
+        <h3 class="font-display text-2xl font-extrabold text-white leading-tight">
+          Ce brassin est complet
+        </h3>
+
+        <p class="text-sm text-zinc-400 mt-2.5 leading-relaxed">
+          Notre première cuvée artisanale est intégralement réservée. Aucun montant ne vous est débité aujourd'hui : laissez votre adresse e-mail pour être alerté en priorité dès la sortie de cuve du prochain lot.
+        </p>
+
+        <!-- Récapitulatif du pack sélectionné -->
+        <div class="mt-4 bg-zinc-950/90 border border-zinc-800 rounded-2xl p-3.5 flex items-center justify-between text-xs">
+          <div>
+            <span class="text-zinc-500 block">Pack sélectionné :</span>
+            <strong id="modal-selected-pack" class="text-sm text-white">KVALINE — Édition Gilet Jaune (12 × 50 cl)</strong>
+          </div>
+          <span class="font-display font-extrabold text-base text-[#E2F124] shrink-0 ml-2">30,00 €</span>
+        </div>
+
+        <!-- Formulaire E-mail -->
+        <form id="waitlist-form" onsubmit="submitWaitlist(event)" class="mt-4 space-y-3">
+          <div>
+            <label for="customer-email" class="block text-xs font-bold text-zinc-300 mb-1.5">
+              Votre adresse e-mail :
+            </label>
+            <input type="email" id="customer-email" required placeholder="votre.email@exemple.fr"
+                   class="w-full px-4 py-3 rounded-xl border border-zinc-700 focus:border-[#E2F124] focus:outline-none text-sm text-white bg-zinc-950 placeholder:text-zinc-500" />
+          </div>
+          <button type="submit"
+                  class="w-full bg-[#E2F124] hover:bg-[#d5e41d] text-[#0e0e0f] font-display font-extrabold text-sm sm:text-base py-3.5 px-5 rounded-xl transition shadow-md cursor-pointer">
+            M'alerter en priorité
+          </button>
+        </form>
+      </div>
+
+      <!-- État 2 : Confirmation après saisie e-mail -->
+      <div id="modal-success-state" class="hidden text-center py-3 space-y-3">
+        <div class="w-14 h-14 rounded-2xl bg-[#E2F124]/15 text-[#E2F124] border border-[#E2F124]/30 flex items-center justify-center text-2xl font-extrabold mx-auto">
+          ✓
+        </div>
+        <h3 class="font-display text-2xl font-extrabold text-white">
+          Demande enregistrée
+        </h3>
+        <p class="text-sm text-zinc-400 leading-relaxed">
+          Merci ! Vous serez informé en priorité par e-mail dès la disponibilité de votre pack <strong id="confirm-pack-name" class="text-white">KVALINE (12 × 50 cl)</strong> au tarif de <strong class="text-white">30,00 €</strong>.
+        </p>
+        <button type="button" onclick="closeCheckoutModal()"
+                class="mt-2 w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-sm py-3 rounded-xl transition cursor-pointer">
+          Retourner sur la boutique
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- PANNEAU SECRET "MODE CRÉATEUR" (TOTALEMENT INVISIBLE PAR DÉFAUT)      -->
+  <!-- Activable via ?admin=kvaline2026, Ctrl+M / Cmd+M ou triple-clic logo  -->
+  <!-- ===================================================================== -->
+  <div id="creator-drawer" class="hidden fixed bottom-5 right-5 z-50 w-[92vw] max-w-md bg-zinc-950 text-white rounded-3xl p-5 shadow-2xl border-2 border-[#E2F124]/70">
+    <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
+      <div>
+        <span class="text-[10px] uppercase tracking-widest text-[#E2F124] font-bold block">Tableau de bord privé · Ctrl+M</span>
+        <h4 class="font-display font-extrabold text-lg">Mode Créateur — Stats Live</h4>
+      </div>
+      <button type="button" onclick="closeCreatorDrawer()" aria-label="Fermer le panneau créateur"
+              class="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center text-xs font-bold cursor-pointer">
+        ✕
+      </button>
+    </div>
+
+    <!-- Compteurs en direct -->
+    <div class="grid grid-cols-3 gap-2.5 my-4 text-center">
+      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-3">
+        <span class="text-[11px] text-zinc-400 block">Intéressés</span>
+        <strong id="admin-interested" class="font-display text-2xl font-extrabold text-white">710</strong>
+      </div>
+      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-3">
+        <span class="text-[11px] text-zinc-400 block">Prêts à acheter</span>
+        <strong id="admin-buyers" class="font-display text-2xl font-extrabold text-[#E2F124]">241</strong>
+      </div>
+      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-3">
+        <span class="text-[11px] text-zinc-400 block">Conversion</span>
+        <strong id="admin-rate" class="font-display text-2xl font-extrabold text-emerald-400">33,9%</strong>
+      </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="grid grid-cols-2 gap-2 mb-4">
+      <button type="button" onclick="simulateNewVisitor()"
+              class="bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold py-2.5 px-3 rounded-xl border border-zinc-700 transition cursor-pointer">
+        Simuler un nouveau client
+      </button>
+      <button type="button" onclick="resetDemoStats()"
+              class="bg-zinc-900 hover:bg-red-950/60 text-zinc-300 hover:text-red-300 text-xs font-bold py-2.5 px-3 rounded-xl border border-zinc-700 transition cursor-pointer">
+        Réinitialiser à 710 / 241
+      </button>
+    </div>
+
+    <!-- Liste des e-mails capturés + Export CSV -->
+    <div>
+      <div class="flex items-center justify-between text-xs text-zinc-400 mb-1.5">
+        <span>E-mails enregistrés (<span id="admin-leads-count">0</span>)</span>
+        <button type="button" onclick="exportLeadsCSV()" class="text-[#E2F124] hover:underline font-semibold cursor-pointer">
+          Exporter CSV
+        </button>
+      </div>
+      <div id="admin-leads-list" class="max-h-36 overflow-y-auto space-y-1.5 bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-xs">
+        <p class="text-zinc-500 italic text-center py-2">Aucun e-mail enregistré pour le moment.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- LOGIQUE JAVASCRIPT : SUIVI CACHÉ, SYNCHRO ONGLETS & MODE CRÉATEUR     -->
+  <!-- ===================================================================== -->
+  <script>
+    const STORAGE_KEY_STATS = 'kvaline_fakedoor_stats_v3';
+    const STORAGE_KEY_LEADS = 'kvaline_fakedoor_leads_v3';
+    const SESSION_VIEW_FLAG = 'kvaline_fakedoor_viewed_session_v3';
+
+    const DEFAULT_STATS = {
+      interested: 710,
+      buyers: 241
+    };
+
+    let selectedEdition = 'gilet';
+    const UNIT_PACK_PRICE = 30;
+
+    // Vérification du paramètre d'URL ?admin=kvaline2026
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasAdminParam = urlParams.get('admin') === 'kvaline2026';
+
+    function getStats() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_STATS);
+        if (!raw) return { ...DEFAULT_STATS };
+        const parsed = JSON.parse(raw);
+        return {
+          interested: typeof parsed.interested === 'number' ? parsed.interested : DEFAULT_STATS.interested,
+          buyers: typeof parsed.buyers === 'number' ? parsed.buyers : DEFAULT_STATS.buyers
+        };
+      } catch (e) {
+        return { ...DEFAULT_STATS };
+      }
+    }
+
+    function saveStats(stats) {
+      localStorage.setItem(STORAGE_KEY_STATS, JSON.stringify(stats));
+      renderStats(stats, true);
+    }
+
+    function getLeads() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_LEADS);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveLead(lead) {
+      const leads = getLeads();
+      leads.unshift(lead);
+      localStorage.setItem(STORAGE_KEY_LEADS, JSON.stringify(leads));
+      renderLeads();
+    }
+
+    // Actualisation des compteurs dans le panneau Mode Créateur
+    function renderStats(stats, animate = false) {
+      const interestedEl = document.getElementById('admin-interested');
+      const buyersEl = document.getElementById('admin-buyers');
+      const rateEl = document.getElementById('admin-rate');
+
+      if (interestedEl) {
+        interestedEl.textContent = stats.interested;
+        if (animate) {
+          interestedEl.classList.remove('animate-pop');
+          void interestedEl.offsetWidth;
+          interestedEl.classList.add('animate-pop');
+        }
+      }
+
+      if (buyersEl) {
+        buyersEl.textContent = stats.buyers;
+        if (animate) {
+          buyersEl.classList.remove('animate-pop');
+          void buyersEl.offsetWidth;
+          buyersEl.classList.add('animate-pop');
+        }
+      }
+
+      if (rateEl) {
+        const rate = stats.interested > 0
+          ? ((stats.buyers / stats.interested) * 100).toFixed(1).replace('.', ',')
+          : '0,0';
+        rateEl.textContent = rate + '%';
+      }
+    }
+
+    function renderLeads() {
+      const leads = getLeads();
+      const countEl = document.getElementById('admin-leads-count');
+      const listEl = document.getElementById('admin-leads-list');
+      if (countEl) countEl.textContent = leads.length;
+      if (!listEl) return;
+
+      if (leads.length === 0) {
+        listEl.innerHTML = '<p class="text-zinc-500 italic text-center py-2">Aucun e-mail enregistré pour le moment.</p>';
+        return;
+      }
+
+      listEl.innerHTML = leads.map(item => `
+        <div class="flex items-center justify-between bg-zinc-950 px-2.5 py-2 rounded-lg border border-zinc-800">
+          <div class="truncate pr-2">
+            <span class="font-bold text-white block truncate">${item.email}</span>
+            <span class="text-[11px] text-zinc-400">${item.pack}</span>
+          </div>
+          <span class="text-[10px] text-[#E2F124] font-semibold shrink-0">${item.time}</span>
+        </div>
+      `).join('');
+    }
+
+    // Ouverture de la modale de précommande + incrémentation cachée "Prêts à acheter"
+    function openCheckoutModal(edition) {
+      if (edition) selectedEdition = edition;
+
+      const stats = getStats();
+      stats.buyers += 1;
+      saveStats(stats);
+
+      const editionLabel = selectedEdition === 'gilet'
+        ? 'KVALINE — Édition Gilet Jaune (12 × 50 cl)'
+        : 'KVALINE — Édition Cagoule (12 × 50 cl)';
+
+      document.getElementById('modal-selected-pack').textContent = editionLabel;
+      document.getElementById('confirm-pack-name').textContent = editionLabel;
+
+      document.getElementById('modal-form-state').classList.remove('hidden');
+      document.getElementById('modal-success-state').classList.add('hidden');
+
+      const modal = document.getElementById('checkout-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeCheckoutModal() {
+      const modal = document.getElementById('checkout-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function submitWaitlist(event) {
+      event.preventDefault();
+      const emailInput = document.getElementById('customer-email');
+      const email = emailInput.value.trim();
+      if (!email) return;
+
+      const editionName = selectedEdition === 'gilet' ? 'Édition Gilet Jaune' : 'Édition Cagoule';
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+      saveLead({
+        email,
+        pack: `${editionName} (12 × 50 cl) · ${UNIT_PACK_PRICE} €`,
+        time: timeStr
+      });
+
+      emailInput.value = '';
+      document.getElementById('modal-form-state').classList.add('hidden');
+      document.getElementById('modal-success-state').classList.remove('hidden');
+    }
+
+    // Contrôles du panneau secret Mode Créateur
+    function toggleCreatorDrawer() {
+      const drawer = document.getElementById('creator-drawer');
+      const isHidden = drawer.classList.contains('hidden');
+      if (isHidden) {
+        renderStats(getStats(), false);
+        renderLeads();
+        drawer.classList.remove('hidden');
+      } else {
+        drawer.classList.add('hidden');
+      }
+    }
+
+    function closeCreatorDrawer() {
+      document.getElementById('creator-drawer').classList.add('hidden');
+    }
+
+    function simulateNewVisitor() {
+      const stats = getStats();
+      stats.interested += 1;
+      saveStats(stats);
+    }
+
+    function exportLeadsCSV() {
+      const leads = getLeads();
+      const csvRows = ['Email,Edition,Horodatage'];
+      leads.forEach(l => {
+        csvRows.push(`"${l.email.replace(/"/g, '""')}","${l.pack.replace(/"/g, '""')}","${l.time}"`);
+      });
+      const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'kvaline_leads_fakedoor.csv';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function resetDemoStats() {
+      localStorage.setItem(STORAGE_KEY_STATS, JSON.stringify({ ...DEFAULT_STATS }));
+      localStorage.removeItem(STORAGE_KEY_LEADS);
+      sessionStorage.removeItem(SESSION_VIEW_FLAG);
+      renderStats({ ...DEFAULT_STATS }, true);
+      renderLeads();
+    }
+
+    // Raccourci clavier Ctrl+M ou Cmd+M pour ouvrir/fermer le Mode Créateur
+    document.addEventListener('keydown', (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'm') {
+        event.preventDefault();
+        toggleCreatorDrawer();
+      }
+    });
+
+    // Triple-clic sur le logo KVALINE pour ouvrir/fermer le Mode Créateur
+    let logoClickCount = 0;
+    let logoClickTimer = null;
+    document.getElementById('brand-logo').addEventListener('click', () => {
+      logoClickCount += 1;
+      clearTimeout(logoClickTimer);
+      if (logoClickCount >= 3) {
+        logoClickCount = 0;
+        toggleCreatorDrawer();
+      } else {
+        logoClickTimer = setTimeout(() => {
+          logoClickCount = 0;
+        }, 500);
+      }
+    });
+
+    // Synchronisation temps réel entre onglets via storage event
+    window.addEventListener('storage', (event) => {
+      if (event.key === STORAGE_KEY_STATS) {
+        renderStats(getStats(), true);
+      }
+      if (event.key === STORAGE_KEY_LEADS) {
+        renderLeads();
+      }
+    });
+
+    // Initialisation au chargement de la page
+    window.addEventListener('DOMContentLoaded', () => {
+      const currentStats = getStats();
+
+      // Incrémente "intéressés" de +1 une fois par session (sauf si ouvert directement en ?admin=kvaline2026)
+      if (!hasAdminParam && !sessionStorage.getItem(SESSION_VIEW_FLAG)) {
+        currentStats.interested += 1;
+        sessionStorage.setItem(SESSION_VIEW_FLAG, '1');
+        saveStats(currentStats);
+      } else {
+        renderStats(currentStats, false);
+      }
+
+      renderLeads();
+
+      // Ouvre automatiquement le Mode Créateur si ?admin=kvaline2026 est présent dans l'URL
+      if (hasAdminParam) {
+        document.getElementById('creator-drawer').classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>
